@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Checker Pro - Verificador de Listas M3U</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: hsl(221, 83%, 53%);
+            --primary-dark: hsl(221, 83%, 45%);
+            --secondary: hsl(262, 83%, 58%);
+            --accent: hsl(142, 76%, 36%);
+            --error: hsl(0, 84%, 60%);
+            --warning: hsl(38, 92%, 50%);
+            --background: hsl(240, 10%, 3.9%);
+            --card: hsl(240, 10%, 8%);
+            --border: hsl(240, 3.7%, 15.9%);
+            --foreground: hsl(0, 0%, 98%);
+            --muted: hsl(240, 3.8%, 46.1%);
+            --gradient-primary: linear-gradient(135deg, var(--primary), var(--secondary));
+            --shadow-glow: 0 0 40px hsla(221, 83%, 53%, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Theme System */
+        .theme-cosmic {
+            --primary: hsl(246, 80%, 60%);
+            --secondary: hsl(260, 44%, 58%);
+            --accent: hsl(316, 73%, 52%);
+        }
+
+        .theme-sunset {
+            --primary: hsl(339, 90%, 51%);
+            --secondary: hsl(47, 97%, 64%);
+            --accent: hsl(1, 83%, 63%);
+        }
+
+        .theme-ocean {
+            --primary: hsl(193, 100%, 50%);
+            --secondary: hsl(221, 56%, 51%);
+            --accent: hsl(168, 84%, 68%);
+        }
+
+        .theme-forest {
+            --primary: hsl(173, 80%, 40%);
+            --secondary: hsl(123, 38%, 57%);
+            --accent: hsl(141, 43%, 74%);
+        }
+
+        .theme-royal {
+            --primary: hsl(272, 51%, 54%);
+            --secondary: hsl(162, 63%, 41%);
+            --accent: hsl(42, 87%, 55%);
+        }
+
+        .theme-neon {
+            --primary: hsl(315, 100%, 50%);
+            --secondary: hsl(120, 100%, 50%);
+            --accent: hsl(270, 100%, 50%);
+        }
+
+        .theme-fire {
+            --primary: hsl(15, 95%, 55%);
+            --secondary: hsl(45, 100%, 50%);
+            --accent: hsl(0, 100%, 65%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: var(--transition);
+            position: relative;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, hsla(221, 83%, 53%, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, hsla(262, 83%, 58%, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, hsla(142, 76%, 36%, 0.05) 0%, transparent 50%);
+            z-index: -2;
+            pointer-events: none;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url(' https://c.tenor.com/RK3-YaV8ffEAAAAC/tenor.gif ');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 1.15;
+            z-index: -1;
+            pointer-events: none;
+            transition: all 0.5s ease;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: translateX(0) translateY(0) scale(1); }
+            25% { transform: translateX(-10px) translateY(-5px) scale(1.02); }
+            50% { transform: translateX(10px) translateY(5px) scale(0.98); }
+            75% { transform: translateX(-5px) translateY(10px) scale(1.01); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: var(--shadow-glow); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px hsla(221, 83%, 53%, 0.3); }
+            100% { transform: scale(1); box-shadow: var(--shadow-glow); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Settings Button */
+        .settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 50%;
+            color: var(--foreground);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            transition: var(--transition);
+            box-shadow: var(--shadow-glow);
+            animation: pulse 3s infinite;
+        }
+
+        .settings-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        /* Settings Modal */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: hsla(0, 0%, 0%, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .settings-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px hsla(0, 0%, 0%, 0.5);
+            animation: slideUp 0.3s ease;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: var(--error);
+            background: hsla(0, 84%, 60%, 0.1);
+        }
+
+        .theme-selector, .media-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .theme-option {
+            padding: 1rem;
+            border-radius: 15px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            background: var(--card);
+        }
+
+        .theme-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.2;
+            transition: var(--transition);
+        }
+
+        .theme-cosmic::before { background: linear-gradient(135deg, hsl(246, 80%, 60%), hsl(260, 44%, 58%)); }
+        .theme-sunset::before { background: linear-gradient(135deg, hsl(339, 90%, 51%), hsl(47, 97%, 64%)); }
+        .theme-ocean::before { background: linear-gradient(135deg, hsl(193, 100%, 50%), hsl(221, 56%, 51%)); }
+        .theme-forest::before { background: linear-gradient(135deg, hsl(173, 80%, 40%), hsl(123, 38%, 57%)); }
+        .theme-royal::before { background: linear-gradient(135deg, hsl(272, 51%, 54%), hsl(162, 63%, 41%)); }
+        .theme-neon::before { background: linear-gradient(135deg, hsl(315, 100%, 50%), hsl(120, 100%, 50%)); }
+        .theme-fire::before { background: linear-gradient(135deg, hsl(15, 95%, 55%), hsl(45, 100%, 50%)); }
+
+        .theme-option:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .theme-option.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px hsla(142, 76%, 36%, 0.3);
+        }
+
+        .theme-name {
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            color: var(--foreground);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--foreground);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            background: hsla(0, 0%, 100%, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--foreground);
+            font-size: 1rem;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px hsla(221, 83%, 53%, 0.1);
+        }
+
+        .btn {
+            background: var(--gradient-primary);
+            color: var(--foreground);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px hsla(221, 83%, 53%, 0.4);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, hsla(0, 0%, 100%, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Audio Controls */
+        .audio-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 1rem;
+            z-index: 1000;
+            display: none;
+            animation: slideUp 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .audio-controls.visible {
+            display: block;
+        }
+
+        .audio-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .audio-title {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .volume-slider {
+            width: 100px;
+            accent-color: var(--primary);
+        }
+
+        /* Tab System */
+        .input-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+            gap: 0.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 1rem 1.5rem;
+            color: var(--muted);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: hsla(221, 83%, 53%, 0.1);
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+            background: hsla(221, 83%, 53%, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* File Input Styling */
+        .file-input-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .file-input-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 150px;
+            padding: 2rem;
+            background: hsla(0, 0%, 100%, 0.03);
+            border: 2px dashed var(--border);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--primary);
+            background: hsla(221, 83%, 53%, 0.05);
+        }
+
+        .file-input-label i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-input-label span:first-of-type {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--foreground);
+        }
+
+        .file-info {
+            font-size: 0.9rem;
+            color: var(--muted);
+            max-width: 300px;
+        }
+
+        .file-status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .file-status.success {
+            display: block;
+            background: hsla(142, 76%, 36%, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .file-status.error {
+            display: block;
+            background: hsla(0, 84%, 60%, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        /* Main Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        .input-section {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-glow);
+            animation: slideUp 0.8s ease-out 0.2s both;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg at 50% 50%, transparent, var(--primary), transparent);
+            opacity: 0;
+            animation: rotate 4s linear infinite;
+            transition: opacity 0.3s ease;
+        }
+
+        .input-section:hover::before {
+            opacity: 0.1;
+        }
+
+        .input-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px hsla(221, 83%, 53%, 0.2);
+        }
+
+        .textarea-field {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+
+        .progress-section {
+            margin: 2rem 0;
+            animation: slideUp 0.8s ease-out 0.4s both;
+        }
+
+        .progress-container {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .progress-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-info h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: hsla(0, 0%, 100%, 0.05);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .progress-bar-container {
+            position: relative;
+            background: var(--border);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+            background-size: 30px 30px;
+            background-image: linear-gradient(
+                45deg,
+                hsla(0, 0%, 100%, 0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                hsla(0, 0%, 100%, 0.2) 50%,
+                hsla(0, 0%, 100%, 0.2) 75%,
+                transparent 75%
+            );
+            animation: shimmer 1s linear infinite;
+        }
+
+        .results-section {
+            margin-top: 2rem;
+        }
+
+        .result-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-glow);
+            animation: slideUp 0.5s ease-out;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, hsla(0, 0%, 100%, 0.05), transparent);
+            transition: left 0.5s;
+        }
+
+        .result-card:hover::before {
+            left: 100%;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px hsla(221, 83%, 53%, 0.2);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-header h3 {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-active {
+            background: hsla(142, 76%, 36%, 0.2);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .status-error {
+            background: hsla(0, 84%, 60%, 0.2);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: hsla(0, 0%, 100%, 0.05);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .info-item:hover {
+            background: hsla(0, 0%, 100%, 0.08);
+            border-color: var(--primary);
+        }
+
+        .info-item i {
+            color: var(--primary);
+            width: 20px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--muted);
+            min-width: 100px;
+        }
+
+        .info-value {
+            color: var(--foreground);
+            word-break: break-all;
+        }
+
+        .link-group {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .link-group h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .link-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--gradient-primary);
+            color: var(--foreground);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, hsla(0, 0%, 100%, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .link-btn:hover::before {
+            left: 100%;
+        }
+
+        .link-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px hsla(221, 83%, 53%, 0.4);
+        }
+
+        .error-message {
+            background: hsla(0, 84%, 60%, 0.1);
+            border: 1px solid var(--error);
+            border-radius: 12px;
+            padding: 1.5rem;
+            color: var(--error);
+            margin-bottom: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--muted);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: rotate 1s ease-in-out infinite;
+        }
+
+        /* Toast Messages */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: var(--foreground);
+            font-weight: 600;
+            z-index: 9999;
+            animation: slideInRight 0.3s ease;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            min-width: 300px;
+            box-shadow: 0 10px 30px hsla(0, 0%, 0%, 0.3);
+        }
+
+        .toast.success {
+            background: hsla(142, 76%, 36%, 0.9);
+            border-color: var(--accent);
+        }
+
+        .toast.error {
+            background: hsla(0, 84%, 60%, 0.9);
+            border-color: var(--error);
+        }
+
+        .toast.removing {
+            animation: slideOutRight 0.3s ease forwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .settings-content {
+                padding: 1.5rem;
+                margin: 1rem;
+                width: calc(100% - 2rem);
+            }
+
+            .theme-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .progress-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .link-buttons {
+                flex-direction: column;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .settings-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .audio-controls {
+                left: 10px;
+                bottom: 10px;
+                padding: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .input-section, .progress-container, .result-card {
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
+
+            .theme-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            .stat-item {
+                padding: 0.8rem;
+            }
+
+            .toast {
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Settings Button -->
+    <button class="settings-btn" id="settingsBtn">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2 class="settings-title">
+                    <i class="fas fa-palette"></i>
+                    Configurações
+                </h2>
+                <button class="close-btn" id="closeBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="theme-selector">
+                <h3 class="section-title">
+                    <i class="fas fa-paint-brush"></i>
+                    Escolher Tema
+                </h3>
+                <div class="theme-grid">
+                    <div class="theme-option active" data-theme="">
+                        <span class="theme-name">Padrão</span>
+                    </div>
+                    <div class="theme-option theme-cosmic" data-theme="cosmic">
+                        <span class="theme-name">Cósmico</span>
+                    </div>
+                    <div class="theme-option theme-sunset" data-theme="sunset">
+                        <span class="theme-name">Pôr do Sol</span>
+                    </div>
+                    <div class="theme-option theme-ocean" data-theme="ocean">
+                        <span class="theme-name">Oceano</span>
+                    </div>
+                    <div class="theme-option theme-forest" data-theme="forest">
+                        <span class="theme-name">Floresta</span>
+                    </div>
+                    <div class="theme-option theme-royal" data-theme="royal">
+                        <span class="theme-name">Real</span>
+                    </div>
+                    <div class="theme-option theme-neon" data-theme="neon">
+                        <span class="theme-name">Neon</span>
+                    </div>
+                    <div class="theme-option theme-fire" data-theme="fire">
+                        <span class="theme-name">Fogo</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="media-section">
+                <h3 class="section-title">
+                    <i class="fas fa-image"></i>
+                    Personalizar Fundo
+                </h3>
+                <div class="input-group">
+                    <label for="backgroundInput" class="input-label">URL da Imagem/GIF</label>
+                    <input type="url" id="backgroundInput" class="input-field" 
+                           placeholder="https://exemplo.com/imagem.gif">
+                </div>
+                <button id="applyBackgroundBtn" class="btn btn-full">
+                    <i class="fas fa-image"></i>
+                    Aplicar Fundo
+                </button>
+            </div>
+
+            <div class="media-section">
+                <h3 class="section-title">
+                    <i class="fas fa-music"></i>
+                    Música de Fundo
+                </h3>
+                <div class="input-group">
+                    <label for="audioInput" class="input-label">URL do Áudio (MP3/OGG)</label>
+                    <input type="url" id="audioInput" class="input-field" 
+                           placeholder="https://exemplo.com/musica.mp3">
+                </div>
+                <button id="playAudioBtn" class="btn btn-full">
+                    <i class="fas fa-play"></i>
+                    Tocar Música
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Controls -->
+    <div class="audio-controls" id="audioControls">
+        <div class="audio-info">
+            <span class="audio-title">🎵 Música de Fundo</span>
+            <button class="btn" id="stopAudioBtn" style="padding: 0.5rem;">
+                <i class="fas fa-stop"></i>
+            </button>
+        </div>
+        <div class="volume-control">
+            <i class="fas fa-volume-down"></i>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.3">
+            <i class="fas fa-volume-up"></i>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <i class="fas fa-satellite-dish"></i>
+                IPTV Checker Pro
+            </h1>
+            <p class="subtitle">Verificador profissional de listas M3U com análise completa</p>
+        </header>
+
+        <section class="input-section">
+            <div class="input-tabs">
+                <button class="tab-btn active" data-tab="manual">
+                    <i class="fas fa-edit"></i>
+                    Inserir Manualmente
+                </button>
+                <button class="tab-btn" data-tab="file">
+                    <i class="fas fa-file-upload"></i>
+                    Carregar Arquivo TXT
+                </button>
+            </div>
+
+            <div class="tab-content active" id="manual-tab">
+                <div class="input-group">
+                    <label for="urlInput" class="input-label">
+                        <i class="fas fa-link"></i>
+                        URLs das Listas M3U
+                    </label>
+                    <textarea 
+                        id="urlInput" 
+                        class="input-field textarea-field" 
+                        placeholder="Cole aqui as URLs das suas listas M3U (uma por linha)
+
+Exemplo:
+http://exemplo.com:8080/get.php?username=user&password=pass&type=m3u_plus
+http://outro.exemplo.com/playlist.m3u"
+                        rows="6"
+                    ></textarea>
+                </div>
+            </div>
+
+            <div class="tab-content" id="file-tab">
+                <div class="input-group">
+                    <label for="fileInput" class="input-label">
+                        <i class="fas fa-file-alt"></i>
+                        Selecionar Arquivo TXT
+                    </label>
+                    <div class="file-input-container">
+                        <input type="file" id="fileInput" accept=".txt" class="file-input" />
+                        <label for="fileInput" class="file-input-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Clique para selecionar arquivo .txt</span>
+                            <span class="file-info">O arquivo será processado para extrair URLs automaticamente</span>
+                        </label>
+                    </div>
+                    <div id="fileStatus" class="file-status"></div>
+                </div>
+            </div>
+            
+            <button id="checkBtn" class="btn btn-full">
+                <i class="fas fa-play"></i>
+                <span>Iniciar Verificação</span>
+            </button>
+        </section>
+
+        <section id="progressSection" class="progress-section hidden">
+            <div class="progress-container">
+                <div class="progress-info">
+                    <h3><i class="fas fa-chart-line"></i> Progresso da Verificação</h3>
+                    <div class="progress-stats">
+                        <div class="stat-item">
+                            <span id="liveCounter" class="stat-number">0</span>
+                            <span class="stat-label">Canais</span>
+                        </div>
+                        <div class="stat-item">
+                            <span id="seriesCounter" class="stat-number">0</span>
+                            <span class="stat-label">Séries</span>
+                        </div>
+                        <div class="stat-item">
+                            <span id="vodCounter" class="stat-number">0</span>
+                            <span class="stat-label">Filmes</span>
+                        </div>
+                        <div class="stat-item">
+                            <span id="timeCounter" class="stat-number">0s</span>
+                            <span class="stat-label">Tempo</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+                </div>
+                <div style="text-align: center; margin-top: 1rem; color: var(--muted);">
+                    <span id="progressText">Preparando verificação...</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="resultsSection" class="results-section">
+            <!-- Resultados serão inseridos aqui dinamicamente -->
+        </section>
+    </div>
+
+    <script>
+        class IPTVChecker {
+            constructor() {
+                this.initElements();
+                this.totals = { live: 0, series: 0, vod: 0 };
+                this.startTime = null;
+                this.timeInterval = null;
+                this.backgroundAudio = null;
+                this.init();
+            }
+
+            initElements() {
+                this.checkBtn = document.getElementById('checkBtn');
+                this.urlInput = document.getElementById('urlInput');
+                this.progressSection = document.getElementById('progressSection');
+                this.resultsSection = document.getElementById('resultsSection');
+                this.progressBar = document.getElementById('progressBar');
+                this.progressText = document.getElementById('progressText');
+                
+                this.counters = {
+                    live: document.getElementById('liveCounter'),
+                    series: document.getElementById('seriesCounter'),
+                    vod: document.getElementById('vodCounter'),
+                    time: document.getElementById('timeCounter')
+                };
+            }
+
+            init() {
+                this.checkBtn.addEventListener('click', () => this.startCheck());
+                
+                // Auto-resize textarea
+                this.urlInput.addEventListener('input', () => {
+                    this.urlInput.style.height = 'auto';
+                    this.urlInput.style.height = this.urlInput.scrollHeight + 'px';
+                });
+
+                this.initTabs();
+                this.initFileUpload();
+                this.initSettings();
+            }
+
+            initTabs() {
+                const tabBtns = document.querySelectorAll('.tab-btn');
+                const tabContents = document.querySelectorAll('.tab-content');
+
+                tabBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const targetTab = btn.dataset.tab;
+                        
+                        // Remove active class from all buttons and contents
+                        tabBtns.forEach(b => b.classList.remove('active'));
+                        tabContents.forEach(c => c.classList.remove('active'));
+                        
+                        // Add active class to clicked button and corresponding content
+                        btn.classList.add('active');
+                        document.getElementById(`${targetTab}-tab`).classList.add('active');
+                    });
+                });
+            }
+
+            initFileUpload() {
+                const fileInput = document.getElementById('fileInput');
+                const fileStatus = document.getElementById('fileStatus');
+                const fileLabel = document.querySelector('.file-input-label span:first-of-type');
+
+                fileInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    
+                    if (!file) {
+                        fileStatus.style.display = 'none';
+                        fileLabel.textContent = 'Clique para selecionar arquivo .txt';
+                        return;
+                    }
+
+                    if (!file.name.toLowerCase().endsWith('.txt')) {
+                        this.showFileStatus('Apenas arquivos .txt são aceitos!', 'error');
+                        fileInput.value = '';
+                        return;
+                    }
+
+                    try {
+                        fileLabel.textContent = `Arquivo selecionado: ${file.name}`;
+                        const content = await this.readFileContent(file);
+                        const urls = this.extractUrlsFromText(content);
+                        
+                        if (urls.length === 0) {
+                            this.showFileStatus('Nenhuma URL encontrada no arquivo!', 'error');
+                            return;
+                        }
+
+                        // Preencher o textarea com as URLs encontradas
+                        this.urlInput.value = urls.join('\n');
+                        this.urlInput.style.height = 'auto';
+                        this.urlInput.style.height = this.urlInput.scrollHeight + 'px';
+                        
+                        this.showFileStatus(`✅ ${urls.length} URLs encontradas e carregadas!`, 'success');
+                        
+                        // Mudar automaticamente para a aba manual para mostrar as URLs
+                        document.querySelector('[data-tab="manual"]').click();
+                        
+                    } catch (error) {
+                        console.error('Erro ao processar arquivo:', error);
+                        this.showFileStatus('Erro ao processar o arquivo!', 'error');
+                    }
+                });
+            }
+
+            readFileContent(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(e);
+                    reader.readAsText(file, 'UTF-8');
+                });
+            }
+
+            extractUrlsFromText(text) {
+                // Regex para encontrar URLs que contêm username e password (típicas de IPTV)
+                const urlRegex = /https?:\/\/[^\s]+username=[^\s&]+&password=[^\s&]+[^\s]*/gi;
+                const matches = text.match(urlRegex) || [];
+                
+                // Limpar e validar URLs
+                const validUrls = matches
+                    .map(url => url.trim())
+                    .filter(url => {
+                        try {
+                            new URL(url);
+                            return url.includes('username=') && url.includes('password=');
+                        } catch {
+                            return false;
+                        }
+                    })
+                    .filter((url, index, array) => array.indexOf(url) === index); // Remove duplicatas
+
+                return validUrls;
+            }
+
+            showFileStatus(message, type) {
+                const fileStatus = document.getElementById('fileStatus');
+                fileStatus.textContent = message;
+                fileStatus.className = `file-status ${type}`;
+                fileStatus.style.display = 'block';
+            }
+
+            initTabs() {
+                const tabBtns = document.querySelectorAll('.tab-btn');
+                const tabContents = document.querySelectorAll('.tab-content');
+
+                tabBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const targetTab = btn.dataset.tab;
+                        
+                        // Remove active class from all buttons and contents
+                        tabBtns.forEach(b => b.classList.remove('active'));
+                        tabContents.forEach(c => c.classList.remove('active'));
+                        
+                        // Add active class to clicked button and corresponding content
+                        btn.classList.add('active');
+                        document.getElementById(`${targetTab}-tab`).classList.add('active');
+                    });
+                });
+            }
+
+            initFileUpload() {
+                const fileInput = document.getElementById('fileInput');
+                const fileStatus = document.getElementById('fileStatus');
+                const fileLabel = document.querySelector('.file-input-label span:first-of-type');
+
+                fileInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    
+                    if (!file) {
+                        fileStatus.style.display = 'none';
+                        fileLabel.textContent = 'Clique para selecionar arquivo .txt';
+                        return;
+                    }
+
+                    if (!file.name.toLowerCase().endsWith('.txt')) {
+                        this.showFileStatus('Apenas arquivos .txt são aceitos!', 'error');
+                        fileInput.value = '';
+                        return;
+                    }
+
+                    try {
+                        fileLabel.textContent = `Arquivo selecionado: ${file.name}`;
+                        const content = await this.readFileContent(file);
+                        const urls = this.extractUrlsFromText(content);
+                        
+                        if (urls.length === 0) {
+                            this.showFileStatus('Nenhuma URL encontrada no arquivo!', 'error');
+                            return;
+                        }
+
+                        // Preencher o textarea com as URLs encontradas
+                        this.urlInput.value = urls.join('\n');
+                        this.urlInput.style.height = 'auto';
+                        this.urlInput.style.height = this.urlInput.scrollHeight + 'px';
+                        
+                        this.showFileStatus(`✅ ${urls.length} URLs encontradas e carregadas!`, 'success');
+                        
+                        // Mudar automaticamente para a aba manual para mostrar as URLs
+                        document.querySelector('[data-tab="manual"]').click();
+                        
+                    } catch (error) {
+                        console.error('Erro ao processar arquivo:', error);
+                        this.showFileStatus('Erro ao processar o arquivo!', 'error');
+                    }
+                });
+            }
+
+            readFileContent(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(e);
+                    reader.readAsText(file, 'UTF-8');
+                });
+            }
+
+            extractUrlsFromText(text) {
+                // Regex para encontrar URLs que contêm username e password (típicas de IPTV)
+                const urlRegex = /https?:\/\/[^\s]+username=[^\s&]+&password=[^\s&]+[^\s]*/gi;
+                const matches = text.match(urlRegex) || [];
+                
+                // Limpar e validar URLs
+                const validUrls = matches
+                    .map(url => url.trim())
+                    .filter(url => {
+                        try {
+                            new URL(url);
+                            return url.includes('username=') && url.includes('password=');
+                        } catch {
+                            return false;
+                        }
+                    })
+                    .filter((url, index, array) => array.indexOf(url) === index); // Remove duplicatas
+
+                return validUrls;
+            }
+
+            showFileStatus(message, type) {
+                const fileStatus = document.getElementById('fileStatus');
+                fileStatus.textContent = message;
+                fileStatus.className = `file-status ${type}`;
+                fileStatus.style.display = 'block';
+            }
+
+            initSettings() {
+                const settingsBtn = document.getElementById('settingsBtn');
+                const settingsModal = document.getElementById('settingsModal');
+                const closeBtn = document.getElementById('closeBtn');
+                const themeOptions = document.querySelectorAll('.theme-option');
+                const applyBackgroundBtn = document.getElementById('applyBackgroundBtn');
+                const playAudioBtn = document.getElementById('playAudioBtn');
+                const stopAudioBtn = document.getElementById('stopAudioBtn');
+                const volumeSlider = document.getElementById('volumeSlider');
+
+                // Settings modal
+                settingsBtn.addEventListener('click', () => {
+                    settingsModal.style.display = 'block';
+                });
+
+                closeBtn.addEventListener('click', () => {
+                    settingsModal.style.display = 'none';
+                });
+
+                settingsModal.addEventListener('click', (e) => {
+                    if (e.target === settingsModal) {
+                        settingsModal.style.display = 'none';
+                    }
+                });
+
+                // Theme switching
+                themeOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        themeOptions.forEach(opt => opt.classList.remove('active'));
+                        option.classList.add('active');
+                        
+                        const theme = option.dataset.theme;
+                        document.body.className = theme ? `theme-${theme}` : '';
+                        
+                        localStorage.setItem('iptvTheme', theme || '');
+                        this.showToast('Tema aplicado!', 'success');
+                    });
+                });
+
+                // Load saved theme
+                const savedTheme = localStorage.getItem('iptvTheme');
+                if (savedTheme) {
+                    document.body.className = savedTheme ? `theme-${savedTheme}` : '';
+                    const themeOption = document.querySelector(`[data-theme="${savedTheme}"]`);
+                    if (themeOption) {
+                        themeOptions.forEach(opt => opt.classList.remove('active'));
+                        themeOption.classList.add('active');
+                    }
+                }
+
+                // Background changer
+                applyBackgroundBtn.addEventListener('click', () => {
+                    const backgroundUrl = document.getElementById('backgroundInput').value.trim();
+                    if (backgroundUrl) {
+                        this.setCustomBackground(backgroundUrl);
+                        localStorage.setItem('iptvBackground', backgroundUrl);
+                        this.showToast('Fundo aplicado!', 'success');
+                    } else {
+                        this.showToast('Insira uma URL válida', 'error');
+                    }
+                });
+
+                // Audio controls
+                playAudioBtn.addEventListener('click', () => {
+                    const audioUrl = document.getElementById('audioInput').value.trim();
+                    if (audioUrl) {
+                        this.playBackgroundAudio(audioUrl);
+                    } else {
+                        this.showToast('Insira uma URL de áudio válida', 'error');
+                    }
+                });
+
+                stopAudioBtn.addEventListener('click', () => {
+                    this.stopBackgroundAudio();
+                });
+
+                volumeSlider.addEventListener('input', () => {
+                    if (this.backgroundAudio) {
+                        this.backgroundAudio.volume = volumeSlider.value;
+                    }
+                });
+
+                // Load saved background
+                const savedBackground = localStorage.getItem('iptvBackground');
+                if (savedBackground) {
+                    document.getElementById('backgroundInput').value = savedBackground;
+                    this.setCustomBackground(savedBackground);
+                }
+            }
+
+            setCustomBackground(url) {
+                let customStyle = document.getElementById('customBgStyle');
+                if (!customStyle) {
+                    customStyle = document.createElement('style');
+                    customStyle.id = 'customBgStyle';
+                    document.head.appendChild(customStyle);
+                }
+                
+                customStyle.textContent = `
+                    body::after {
+                        background-image: url('${url}') !important;
+                        opacity: 0.08 !important;
+                    }
+                `;
+            }
+
+            playBackgroundAudio(url) {
+                try {
+                    this.stopBackgroundAudio();
+                    
+                    this.backgroundAudio = new Audio(url);
+                    this.backgroundAudio.loop = true;
+                    this.backgroundAudio.volume = document.getElementById('volumeSlider').value;
+                    
+                    this.backgroundAudio.play().then(() => {
+                        document.getElementById('audioControls').classList.add('visible');
+                        this.showToast('Música iniciada!', 'success');
+                        localStorage.setItem('iptvAudio', url);
+                    }).catch(error => {
+                        console.error('Erro ao reproduzir áudio:', error);
+                        this.showToast('Erro ao reproduzir áudio', 'error');
+                    });
+                    
+                    this.backgroundAudio.onerror = () => {
+                        this.showToast('Erro ao carregar áudio', 'error');
+                    };
+                    
+                } catch (error) {
+                    console.error('Erro ao inicializar áudio:', error);
+                    this.showToast('Erro ao inicializar áudio', 'error');
+                }
+            }
+
+            stopBackgroundAudio() {
+                if (this.backgroundAudio) {
+                    this.backgroundAudio.pause();
+                    this.backgroundAudio = null;
+                    document.getElementById('audioControls').classList.remove('visible');
+                    localStorage.removeItem('iptvAudio');
+                    this.showToast('Música parada', 'success');
+                }
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('removing');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            async startCheck() {
+                const urls = this.urlInput.value.trim().split('\n').filter(url => url.trim());
+                
+                if (urls.length === 0) {
+                    this.showToast('Insira pelo menos uma URL válida', 'error');
+                    return;
+                }
+
+                this.resetCheck();
+                this.showProgress();
+                this.startTimer();
+
+                for (let i = 0; i < urls.length; i++) {
+                    const url = urls[i].trim();
+                    if (url) {
+                        await this.checkSingleURL(url, i + 1, urls.length);
+                        // Pequena pausa para não sobrecarregar
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    }
+                }
+
+                this.finishCheck();
+            }
+
+            resetCheck() {
+                this.totals = { live: 0, series: 0, vod: 0 };
+                this.resultsSection.innerHTML = '';
+                this.updateCounters();
+                this.checkBtn.disabled = true;
+                this.checkBtn.innerHTML = '<span class="loading-spinner"></span> Verificando...';
+            }
+
+            showProgress() {
+                this.progressSection.classList.remove('hidden');
+                this.progressSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            startTimer() {
+                this.startTime = Date.now();
+                this.timeInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    this.counters.time.textContent = elapsed + 's';
+                }, 1000);
+            }
+
+            async checkSingleURL(url, current, total) {
+                try {
+                    this.updateProgress(current, total, `Verificando ${current}/${total}: Analisando URL...`);
+                    
+                    // Verificar se é uma URL IPTV válida
+                    if (!url.includes('username=') || !url.includes('password=')) {
+                        throw new Error('URL inválida: Deve conter username e password');
+                    }
+
+                    const urlObj = new URL(url);
+                    const params = new URLSearchParams(urlObj.search);
+                    const username = params.get('username');
+                    const password = params.get('password');
+
+                    if (!username || !password) {
+                        throw new Error('URL inválida: username/password não encontrados');
+                    }
+
+                    const host = urlObj.hostname;
+                    const port = urlObj.port || '';
+                    const protocol = urlObj.protocol;
+                    const baseURL = `${protocol}//${host}${port ? ':' + port : ''}`;
+                    const apiBase = `${baseURL}/player_api.php?username=${username}&password=${password}`;
+
+                    this.updateProgress(current, total, `Verificando ${current}/${total}: Conectando ao servidor...`);
+
+                    // Fazer requisições em paralelo para maior eficiência
+                    const requests = [
+                        this.fetchWithTimeout(`${apiBase}`, 10000),
+                        this.fetchWithTimeout(`${apiBase}&action=get_live_streams`, 10000),
+                        this.fetchWithTimeout(`${apiBase}&action=get_series`, 10000),
+                        this.fetchWithTimeout(`${apiBase}&action=get_vod_streams`, 10000)
+                    ];
+
+                    const [userInfo, liveStreams, series, vodStreams] = await Promise.allSettled(requests);
+
+                    this.updateProgress(current, total, `Verificando ${current}/${total}: Processando resultados...`);
+
+                    // Verificar se pelo menos a requisição de user info foi bem-sucedida
+                    if (userInfo.status === 'rejected') {
+                        throw new Error('Falha ao conectar com o servidor');
+                    }
+
+                    const userData = userInfo.value;
+                    if (!userData || !userData.user_info) {
+                        throw new Error('Dados do usuário não encontrados');
+                    }
+
+                    const result = {
+                        url,
+                        username,
+                        password,
+                        host,
+                        port,
+                        baseURL,
+                        userInfo: userData.user_info,
+                        serverInfo: userData.server_info,
+                        counts: {
+                            live: liveStreams.status === 'fulfilled' && Array.isArray(liveStreams.value) ? liveStreams.value.length : 0,
+                            series: series.status === 'fulfilled' && Array.isArray(series.value) ? series.value.length : 0,
+                            vod: vodStreams.status === 'fulfilled' && Array.isArray(vodStreams.value) ? vodStreams.value.length : 0
+                        }
+                    };
+
+                    this.totals.live += result.counts.live;
+                    this.totals.series += result.counts.series;
+                    this.totals.vod += result.counts.vod;
+
+                    this.updateCounters();
+                    this.renderResult(result);
+
+                } catch (error) {
+                    console.error('Erro ao verificar URL:', error);
+                    this.renderError(url, error.message);
+                }
+            }
+
+            async fetchWithTimeout(url, timeout = 10000) {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeout);
+                
+                try {
+                    const response = await fetch(url, { 
+                        signal: controller.signal,
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'User-Agent': 'IPTVChecker/1.0'
+                        }
+                    });
+                    
+                    clearTimeout(id);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const text = await response.text();
+                    
+                    // Tentar fazer parse do JSON
+                    try {
+                        return JSON.parse(text);
+                    } catch {
+                        // Se não for JSON válido, retornar um objeto vazio
+                        throw new Error('Resposta inválida do servidor');
+                    }
+                    
+                } catch (error) {
+                    clearTimeout(id);
+                    if (error.name === 'AbortError') {
+                        throw new Error('Timeout: Servidor não respondeu em 10 segundos');
+                    }
+                    throw error;
+                }
+            }
+
+            updateProgress(current, total, text) {
+                const percentage = (current / total) * 100;
+                this.progressBar.style.width = percentage + '%';
+                this.progressText.textContent = text;
+            }
+
+            updateCounters() {
+                this.counters.live.textContent = this.totals.live.toLocaleString();
+                this.counters.series.textContent = this.totals.series.toLocaleString();
+                this.counters.vod.textContent = this.totals.vod.toLocaleString();
+            }
+
+            renderResult(result) {
+                const { userInfo, serverInfo, counts } = result;
+                
+                if (!userInfo || userInfo.status !== 'Active') {
+                    this.renderError(result.url, 'Conta inativa ou dados inválidos');
+                    return;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                
+                const createdDate = userInfo.created_at ? new Date(userInfo.created_at * 1000).toLocaleString('pt-BR') : 'N/A';
+                const expDate = userInfo.exp_date ? new Date(userInfo.exp_date * 1000).toLocaleString('pt-BR') : 'N/A';
+                const timeNow = serverInfo?.time_now ? new Date(serverInfo.time_now * 1000).toLocaleString('pt-BR') : 'N/A';
+
+                const formats = userInfo.allowed_output_formats || ['m3u8'];
+                const formatLinks = formats.map(format => 
+                    `<a href="${result.baseURL}/player_api.php?username=${result.username}&password=${result.password}&format=${format}" target="_blank" class="link-btn">
+                        <i class="fas fa-download"></i> ${format.toUpperCase()}
+                    </a>`
+                ).join('');
+
+                card.innerHTML = `
+                    <div class="result-header">
+                        <div class="status-badge status-active">
+                            <i class="fas fa-check-circle"></i>
+                            ATIVO
+                        </div>
+                        <h3><i class="fas fa-server"></i> ${result.host}</h3>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span class="info-label">Usuário:</span>
+                            <span class="info-value">${result.username}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-key"></i>
+                            <span class="info-label">Senha:</span>
+                            <span class="info-value">${result.password}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar-plus"></i>
+                            <span class="info-label">Criado em:</span>
+                            <span class="info-value">${createdDate}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar-times"></i>
+                            <span class="info-label">Expira em:</span>
+                            <span class="info-value">${expDate}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span class="info-label">Conexões:</span>
+                            <span class="info-value">${userInfo.active_cons || 0}/${userInfo.max_connections || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-globe"></i>
+                            <span class="info-label">Host:</span>
+                            <span class="info-value">${serverInfo?.url || result.host}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-plug"></i>
+                            <span class="info-label">Porta:</span>
+                            <span class="info-value">${serverInfo?.port || result.port || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span class="info-label">HTTPS:</span>
+                            <span class="info-value">${serverInfo?.https_port || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-tv"></i>
+                            <span class="info-label">Canais Live:</span>
+                            <span class="info-value">${counts.live.toLocaleString()}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-film"></i>
+                            <span class="info-label">Filmes VOD:</span>
+                            <span class="info-value">${counts.vod.toLocaleString()}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-video"></i>
+                            <span class="info-label">Séries:</span>
+                            <span class="info-value">${counts.series.toLocaleString()}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span class="info-label">Hora Servidor:</span>
+                            <span class="info-value">${timeNow}</span>
+                        </div>
+                    </div>
+
+                    <div class="link-group">
+                        <h4><i class="fas fa-download"></i> Downloads das Listas</h4>
+                        <div class="link-buttons">
+                            ${formatLinks}
+                            <a href="http://${result.host}/client_area/index.php?username=${result.username}&password=${result.password}&submit" target="_blank" class="link-btn">
+                                <i class="fas fa-external-link-alt"></i> Painel Cliente
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                this.resultsSection.appendChild(card);
+            }
+
+            renderError(url, error) {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                
+                card.innerHTML = `
+                    <div class="result-header">
+                        <div class="status-badge status-error">
+                            <i class="fas fa-times-circle"></i>
+                            ERRO
+                        </div>
+                        <h3><i class="fas fa-exclamation-triangle"></i> Falha na Verificação</h3>
+                    </div>
+                    <div class="error-message">
+                        <strong>URL:</strong> ${url}<br>
+                        <strong>Erro:</strong> ${error}
+                    </div>
+                `;
+
+                this.resultsSection.appendChild(card);
+            }
+
+            finishCheck() {
+                clearInterval(this.timeInterval);
+                this.checkBtn.disabled = false;
+                this.checkBtn.innerHTML = '<i class="fas fa-play"></i> <span>Iniciar Verificação</span>';
+                this.updateProgress(100, 100, 'Verificação concluída!');
+                
+                this.showToast(`Verificação concluída! ${this.totals.live} canais, ${this.totals.series} séries, ${this.totals.vod} filmes.`, 'success');
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new IPTVChecker();
+        });
+    </script>
+</body>
+</html>
